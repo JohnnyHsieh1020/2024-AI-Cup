@@ -22,9 +22,7 @@ In the competition setting, each question is associated with:
   - 328\. A公司合併資產負債表
   - 794\. A公司財務報告附註
 
-- Correct reasoning:
-總資產 → 出現在資產負債表
-→ 選擇 328
+- Correct reasoning: 提取「總資產」 → 判斷「總資產」應出現在資產負債表 → 選擇 328
 
 ## Dataset Structure
 
@@ -98,7 +96,49 @@ The tagging categories include:
 For most documents, tags are **manually assigned** based on the financial report structure.
 If the PDF content cannot be clearly classified into predefined categories, an LLM-generated summary is used as the tag to provide additional semantic information.
 
-These tags serve as structured metadata, allowing the LLM to reason about which document is most likely to contain the answer.
+Each PDF document is represented using the following metadata schema:  
+
+| Field | Description |
+| --- | --- |
+| pdf_id | Document ID provided by the dataset |
+| company_name | Name of the company appearing in the financial report |
+| tag | Document type label |
+
+Example metadata structure:
+
+```csv
+pdf_id, company_name, tag
+1, Company A, Cash Flow Statement
+2, Company B, Financial Report Notes
+...
+```
+
+This metadata provides structured information that helps the LLM reason about which document is most likely to contain the answer.
+
+**⚠️ The full annotation data is not included in this repository because it is derived from the competition dataset.**
+
+## Candidate Option Construction
+
+For each question, the dataset provides a list of candidate document IDs that may contain the answer.
+
+Each candidate document is converted into a structured option using the document metadata described above.
+
+The option format is constructed as:
+
+```text
+{pdf_id}. {company_name}{tag}
+```
+
+Example:
+
+```text
+112. Company A Cash Flow Statement
+328. Company A Balance Sheet
+794. Company A Financial Report Notes
+```
+
+These structured options are provided to the LLM together with the question.  
+The model then performs reasoning based on the financial keyword in the question and the document tag to determine which document is most likely to contain the answer.
 
 ## Prompt Design
 
@@ -109,7 +149,7 @@ The system uses two types of prompts in the pipeline:
 
 ### Document Retrieval Prompt
 
-```Plain Text
+```text
 你是一位專業的財報專家，請根據以下說明完成任務。
 ---------------------
 options格式範例:
@@ -141,7 +181,7 @@ For these cases, an LLM-generated summary is used as a metadata tag.
 
 The summary provides a short description of the page content and helps the LLM reason about its relevance.
 
-```Plain Text
+```text
 你是一位專業的財報專家，擅長提取財報相關文件中重要資訊以及作重點整理，請用淺顯易懂的方式回應。
 請根據<content>的內文提取重要資訊並在<summary>內做重點整理。
 
@@ -160,7 +200,7 @@ The summary provides a short description of the page content and helps the LLM r
 - Some pages cannot be clearly categorized.
 - LLM reasoning may fail when financial terminology is ambiguous.
 
-## Future improvements
+## Future Improvements
 
 - Automatic document type classification
 - Embedding-based candidate filtering
