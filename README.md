@@ -1,6 +1,6 @@
 # Financial Report Retrieval using LLM
 
-Implementation of a document retrieval pipeline for a financial report QA competition on the T-Brain platform.
+Implementation of a document retrieval pipeline for a financial report QA competition on the [T-Brain platform](https://tbrain.trendmicro.com.tw/Competitions/Details/37).
 
 The goal of the task is not to answer the question directly, but to identify which document contains the answer.
 
