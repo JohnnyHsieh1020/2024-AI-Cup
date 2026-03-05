@@ -67,6 +67,20 @@ Example:
 These values are usually located in specific financial statements.  
 Therefore, identifying the **type of financial document** is an effective strategy for retrieving the correct source document.
 
+## System Pipeline
+
+```mermaid
+flowchart LR
+
+A[Question] --> B[Candidate Document IDs]
+B --> C[Document Metadata]
+C --> D[Prompt Construction]
+D --> E[LLM Reasoning]
+E --> F[Predicted Document ID]
+```
+
+Instead of directly parsing the financial reports, the system uses metadata and reasoning to determine the most likely document.
+
 ## Document Tagging
 
 To facilitate document retrieval, each candidate PDF page is associated with a document tag describing the type of financial information contained in the page.
@@ -85,20 +99,6 @@ For most documents, tags are **manually assigned** based on the financial report
 If the PDF content cannot be clearly classified into predefined categories, an LLM-generated summary is used as the tag to provide additional semantic information.
 
 These tags serve as structured metadata, allowing the LLM to reason about which document is most likely to contain the answer.
-
-## System Pipeline
-
-```mermaid
-flowchart LR
-
-A[Question] --> B[Candidate Document IDs]
-B --> C[Document Metadata]
-C --> D[Prompt Construction]
-D --> E[LLM Reasoning]
-E --> F[Predicted Document ID]
-```
-
-Instead of directly parsing the financial reports, the system uses metadata and reasoning to determine the most likely document.
 
 ## Prompt Design
 
@@ -136,6 +136,11 @@ options格式範例:
 
 ### Summary Generation Prompt
 
+Some document pages cannot be clearly classified into predefined financial statement categories.
+For these cases, an LLM-generated summary is used as a metadata tag.
+
+The summary provides a short description of the page content and helps the LLM reason about its relevance.
+
 ```Plain Text
 你是一位專業的財報專家，擅長提取財報相關文件中重要資訊以及作重點整理，請用淺顯易懂的方式回應。
 請根據<content>的內文提取重要資訊並在<summary>內做重點整理。
@@ -148,3 +153,15 @@ options格式範例:
 <content>{content}</content>
 <summary></summary>
 ```
+
+## Limitations
+
+- Document tags rely on manual annotation.
+- Some pages cannot be clearly categorized.
+- LLM reasoning may fail when financial terminology is ambiguous.
+
+## Future improvements
+
+- Automatic document type classification
+- Embedding-based candidate filtering
+- Hybrid retrieval (metadata + semantic search)
